@@ -14,10 +14,8 @@ pub fn waku_encode_asymmetric(
     public_key: &PublicKey,
     signing_key: Option<&SecretKey>,
 ) -> Result<WakuMessage> {
-    let pk = hex::encode(public_key.serialize_uncompressed());
-    let sk = signing_key
-        .map(|signing_key| hex::encode(signing_key.secret_bytes()))
-        .unwrap_or_default();
+    let pk = hex::encode(public_key.serialize());
+    let sk = signing_key.map(|key| hex::encode(key.serialize())).unwrap_or_default();
     let message_ptr = CString::new(
         serde_json::to_string(&message)
             .expect("WakuMessages should always be able to success serializing"),
@@ -61,9 +59,7 @@ pub fn waku_encode_symmetric(
     signing_key: Option<&SecretKey>,
 ) -> Result<WakuMessage> {
     let symk = hex::encode(symmetric_key.as_slice());
-    let sk = signing_key
-        .map(|signing_key| hex::encode(signing_key.secret_bytes()))
-        .unwrap_or_default();
+    let sk = signing_key.map(|key| hex::encode(key.serialize())).unwrap_or_default();
     let message_ptr = CString::new(
         serde_json::to_string(&message)
             .expect("WakuMessages should always be able to success serializing"),

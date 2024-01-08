@@ -271,14 +271,14 @@ impl Display for WakuLogLevel {
 
 mod secret_key_serde {
     use secp256k1::SecretKey;
-    use serde::de::Error;
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use hex;
 
     pub fn serialize<S>(key: &Option<SecretKey>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let as_string: Option<String> = key.as_ref().map(|key| hex::encode(key.secret_bytes()));
+        let as_string: Option<String> = key.as_ref().map(|key| hex::encode(key.serialize()));
         as_string.serialize(serializer)
     }
 
@@ -290,12 +290,10 @@ mod secret_key_serde {
         match as_string {
             None => Ok(None),
             Some(s) => {
-                let key_bytes = hex::decode(s).map_err(|e| D::Error::custom(format!("{e}")))?;
-                Ok(Some(
-                    SecretKey::from_slice(&key_bytes)
-                        .map_err(|e| D::Error::custom(format!("{e}")))?,
-                ))
+                let key_bytes = hex::decode(s).unwrap(); // Unwrap here for simplicity
+                Ok(Some(SecretKey::parse_slice(&key_bytes).unwrap())) // Unwrap and wrap in Ok(Some(...))
             }
         }
     }
 }
+

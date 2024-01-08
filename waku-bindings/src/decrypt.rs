@@ -57,7 +57,8 @@ pub fn waku_decode_asymmetric(
     message: &WakuMessage,
     asymmetric_key: &SecretKey,
 ) -> Result<DecodedPayload> {
-    let sk = hex::encode(asymmetric_key.secret_bytes());
+    let sk_bytes = asymmetric_key.serialize();
+    let sk = hex::encode(sk_bytes);
 
     let message_ptr = CString::new(
         serde_json::to_string(&message)
